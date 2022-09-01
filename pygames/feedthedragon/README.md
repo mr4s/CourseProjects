@@ -1,4 +1,4 @@
-#READ ME
+# READ ME
 
 This is a small "Feed the Dragon" game from The Art of Doing: Video Game Creation With Python and Pygame course taught by Michael Eramo
 
