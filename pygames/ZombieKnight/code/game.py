@@ -1,4 +1,7 @@
-import pygame
+import pygame, random
+from player import Player
+from zombies import Zombie
+from portals import Green_Portal, Purple_Portal
 from setup import *
 
 STARTING_TIME = 30
@@ -24,9 +27,9 @@ class Game():
         self.night = 1
         self.tts = STARTING_TIME
 
-        self.initialize_tiles()
+        self.initialize()
 
-    def update(self):
+    def update(self, attack=False):
         if self.begin == False:
             display_surface.blit(self.game_name_txt, self.game_name_rect)
             display_surface.blit(self.begin_txt, self.begin_rect)
@@ -34,7 +37,14 @@ class Game():
             for t in self.tile_group:
                 t.update()
 
+            self.portal_group.update()
+            self.player_group.update(self.tile_group, self.portal_group, attack)
+            self.zombie_group.update(self.player_group.sprites()[0].rect.center, (WINDOW_WIDTH, WINDOW_HEIGHT), self.tile_group)
+
             self.blit_text()
+            self.portal_group.draw(display_surface)
+            self.player_group.draw(display_surface)
+            self.zombie_group.draw(display_surface)
 
     def blit_text(self):
         score_txt = self.pixel_font.render(f"Score: {self.score}", True, WHITE)
@@ -60,7 +70,7 @@ class Game():
         display_surface.blit(night_txt, night_rect)
         display_surface.blit(self.game_name_txt, game_name_rect)
 
-    def initialize_tiles(self):
+    def initialize(self):
         tile_map = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -87,6 +97,36 @@ class Game():
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]
 
+        self.initialize_tiles(tile_map)
+        self.initialize_player(tile_map)
+        self.initialize_zombies()
+        self.initialize_portals(tile_map)
+
+    def initialize_portals(self, tile_map):
+        self.portal_group = pygame.sprite.Group()
+        for line in range(len(tile_map)):
+            for row in range(len(tile_map[0])):
+                if tile_map[line][row] == 7:
+                    self.portal_group.add(Green_Portal(row*32-16, line*32+32))
+                elif tile_map[line][row] == 8:
+                    self.portal_group.add(Purple_Portal(row*32-16, line*32+32))
+
+    def initialize_player(self, tile_map):
+        self.player_group = pygame.sprite.Group()
+        for line in range(len(tile_map)):
+            for row in range(len(tile_map[0])):
+                if tile_map[line][row] == 9:
+                    player = Player(row*32, line*32)
+                    self.player_group.add(player)
+
+    def initialize_zombies(self):
+        self.zombie_group = pygame.sprite.Group()
+
+        x = random.randint(0, WINDOW_WIDTH-32)
+        zombie = Zombie(x, 0, random.choice(["boy", "girl"]))
+        self.zombie_group.add(zombie)
+
+    def initialize_tiles(self, tile_map):
         self.tile_group = pygame.sprite.Group()
         for line in range(len(tile_map)):
             for row in range(len(tile_map[0])):
@@ -105,6 +145,9 @@ class Tiles(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (32, 32))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+
+        #mask
+        self.mask = pygame.mask.from_surface(self.image)
         
     def update(self):
         display_surface.blit(self.image, self.rect)

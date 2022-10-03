@@ -21,6 +21,8 @@ if __name__ == "__main__":
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     game.start()
+                if event.key == pygame.K_SPACE:
+                    game.update(True)
                 
         if game.begin:
             display_surface.blit(bg_img, (0, 0))

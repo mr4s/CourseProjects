@@ -11,6 +11,8 @@ global display_surface
 global FPS
 global clock
 
+global CAR_SIZE
+
 WINDOW_WIDTH  = 1280
 WINDOW_HEIGHT = 736
 
@@ -23,3 +25,4 @@ WHITE = (255, 255, 255)
 FPS   = 60
 clock = pygame.time.Clock()
 
+CAR_SIZE = (64, 64)
