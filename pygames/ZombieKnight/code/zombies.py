@@ -1,10 +1,10 @@
-import pygame, random
+import pygame, random, math
 from setup import *
 
 Vector = pygame.math.Vector2
 
 class Zombie(pygame.sprite.Sprite):
-    def __init__(self, x, y, gender="girl"):
+    def __init__(self, x, y, portal_group, gender="girl"):
         super().__init__()
 
         self.sprite = 0
@@ -22,6 +22,8 @@ class Zombie(pygame.sprite.Sprite):
 
         self.VER_ACC = 0.5
 
+        self.new_portal(portal_group)
+
     def load_images(self, gender):
         self.walk_right = []
         self.dead_right = []
@@ -36,16 +38,17 @@ class Zombie(pygame.sprite.Sprite):
 
         self.image = self.walk_right[0]
 
-    def update(self, player_location, portal_location, tile_group):
+    def update(self, player_location, portal_group, tile_group):
         self.mask = pygame.mask.from_surface(self.image)
 
-        self.move(player_location, portal_location)
+        self.move(player_location, portal_group)
         self.stay_on_platform(tile_group)
+        self.go_through_portal(portal_group)
 
-    def move(self, player_location, portal_location):
+    def move(self, player_location, portal_group):
         self.acceleration = Vector(0, self.VER_ACC)
 
-        if self.rect.y <= player_location[1]:
+        if self.rect.centery == player_location[1]:
             if self.rect.x < player_location[0]:
                 #go right
                 self.acceleration.x = self.HOR_ACC
@@ -55,12 +58,10 @@ class Zombie(pygame.sprite.Sprite):
                 self.acceleration.x = -self.HOR_ACC
                 self.animate(self.walk_left)
         else:
-            if self.rect.x < portal_location[0]:
-                #go right
+            if self.acceleration.x > 0:
                 self.acceleration.x = self.HOR_ACC
                 self.animate(self.walk_right)
             else:
-                #go left
                 self.acceleration.x = -self.HOR_ACC
                 self.animate(self.walk_left)
 
@@ -75,12 +76,47 @@ class Zombie(pygame.sprite.Sprite):
 
         self.rect.bottomleft = self.position
 
+    # def get_closest_portal(self, portal_group):
+    #     return (min(portal_group.sprites(), key=lambda portal:math.hypot(portal.rect.centerx-self.rect.centerx, portal.rect.centery-self.rect.centery)))
+
+    def new_portal(self, portal_group):
+        self.next_portal = random.choice([portal_group.sprites()[2], portal_group.sprites()[3]])
+        if self.rect.x < self.next_portal.rect.x:
+            self.acceleration.x = self.HOR_ACC
+        else:
+            #go left
+            self.acceleration.x = -self.HOR_ACC
+
     def stay_on_platform(self, tile_group):
         collided_platforms = pygame.sprite.spritecollide(self, tile_group, False, pygame.sprite.collide_mask)
 
         if collided_platforms and self.velocity.y > 0:
             self.position.y = collided_platforms[0].rect.top+5
             self.velocity.y = 0
+
+    def go_through_portal(self, portal_group):
+        portal = pygame.sprite.spritecollide(self, portal_group, False, pygame.sprite.collide_mask)
+
+        if portal:
+            portal = portal[0]
+            if portal == portal_group.sprites()[0]:
+                self.position = Vector(portal_group.sprites()[3].rect.left-16, portal_group.sprites()[3].rect.bottom)
+                self.rect.bottomright = self.position
+            elif portal == portal_group.sprites()[1]:
+                self.position = Vector(portal_group.sprites()[2].rect.left+54, portal_group.sprites()[2].rect.bottom)
+                self.rect.bottomleft = self.position
+            elif portal == portal_group.sprites()[2]:
+                self.position = Vector(portal_group.sprites()[1].rect.left-16, portal_group.sprites()[1].rect.bottom)
+                self.rect.bottomright = self.position
+            elif portal == portal_group.sprites()[3]:
+                self.position = Vector(portal_group.sprites()[0].rect.left+54, portal_group.sprites()[0].rect.bottom)
+                self.rect.bottomleft = self.position
+
+
+        if portal:
+            return portal
+        else:
+            return []
 
     def die(self):
         if self.velocity >= 0:

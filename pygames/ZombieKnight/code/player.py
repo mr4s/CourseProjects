@@ -1,4 +1,4 @@
-import pygame
+import pygame, random
 from setup import *
 
 Vector = pygame.math.Vector2
@@ -27,7 +27,10 @@ class Player(pygame.sprite.Sprite):
         self.load_images()
         self.slash_group = pygame.sprite.Group()
 
-    def update(self, tile_group, portal_group, attack=False):
+        self.score = 0
+        self.health = STARTING_HEALTH
+
+    def update(self, tile_group, portal_group, zombie_group, attack=False):
         #mask
         self.mask = pygame.mask.from_surface(self.image)
 
@@ -36,6 +39,7 @@ class Player(pygame.sprite.Sprite):
 
         if attack:
             self.attack()
+        self.get_attacked(zombie_group)
         self.slash_group.update()
         self.slash_group.draw(display_surface)
 
@@ -147,6 +151,13 @@ class Player(pygame.sprite.Sprite):
             slash.throw(self.rect.left, self.rect.centery, "left")
             self.animate(self.attack_left, 0.9)
 
+    def get_attacked(self, zombie_group):
+        if pygame.sprite.spritecollide(self, zombie_group, False, pygame.sprite.collide_mask):
+            self.position = Vector(random.randint(70, WINDOW_WIDTH-70), 80)
+
+            if self.health > 0:
+                self.health -= 10
+
     def go_through_portal(self, portal_group):
         portal = pygame.sprite.spritecollide(self, portal_group, False, pygame.sprite.collide_mask)
 
@@ -170,6 +181,9 @@ class Player(pygame.sprite.Sprite):
             return portal
         else:
             return []
+
+    def lose(self):
+        pass
 
 class Slash(pygame.sprite.Sprite):
     def __init__(self, x, y):

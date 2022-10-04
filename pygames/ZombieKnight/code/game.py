@@ -4,9 +4,6 @@ from zombies import Zombie
 from portals import Green_Portal, Purple_Portal
 from setup import *
 
-STARTING_TIME = 30
-STARTING_HEALTH = 100
-
 class Game():
     def __init__(self):
         pygame.font.init()
@@ -22,8 +19,6 @@ class Game():
 
         self.begin = False
 
-        self.score = 0
-        self.health = STARTING_HEALTH
         self.night = 1
         self.tts = STARTING_TIME
 
@@ -38,8 +33,8 @@ class Game():
                 t.update()
 
             self.portal_group.update()
-            self.player_group.update(self.tile_group, self.portal_group, attack)
-            self.zombie_group.update(self.player_group.sprites()[0].rect.center, (WINDOW_WIDTH, WINDOW_HEIGHT), self.tile_group)
+            self.player_group.update(self.tile_group, self.portal_group, self.zombie_group, attack)
+            self.zombie_group.update(self.player_group.sprites()[0].rect.center, self.portal_group, self.tile_group)
 
             self.blit_text()
             self.portal_group.draw(display_surface)
@@ -47,8 +42,8 @@ class Game():
             self.zombie_group.draw(display_surface)
 
     def blit_text(self):
-        score_txt = self.pixel_font.render(f"Score: {self.score}", True, WHITE)
-        health_txt = self.pixel_font.render(f"Health: {self.health}", True, WHITE)
+        score_txt = self.pixel_font.render(f"Score: {self.player_group.sprites()[0].score}", True, WHITE)
+        health_txt = self.pixel_font.render(f"Health: {self.player_group.sprites()[0].health}", True, WHITE)
         night_txt = self.pixel_font.render(f"Night: {self.night}", True, WHITE)
         sunrise_txt = self.pixel_font.render(f"Sunrise In: {self.tts}", True, WHITE)
 
@@ -99,8 +94,8 @@ class Game():
 
         self.initialize_tiles(tile_map)
         self.initialize_player(tile_map)
-        self.initialize_zombies()
         self.initialize_portals(tile_map)
+        self.initialize_zombies()
 
     def initialize_portals(self, tile_map):
         self.portal_group = pygame.sprite.Group()
@@ -123,7 +118,7 @@ class Game():
         self.zombie_group = pygame.sprite.Group()
 
         x = random.randint(0, WINDOW_WIDTH-32)
-        zombie = Zombie(x, 0, random.choice(["boy", "girl"]))
+        zombie = Zombie(x, 0, self.portal_group, random.choice(["boy", "girl"]))
         self.zombie_group.add(zombie)
 
     def initialize_tiles(self, tile_map):
