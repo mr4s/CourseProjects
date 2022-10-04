@@ -1,11 +1,11 @@
-import pygame
+import pygame, random
 from setup import *
 
 class Portal(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
 
-        self.sprite = 0
+        # self.sprite = random.randint(0, 20)
         self.sprites = []
         
         self.load_images()
@@ -32,6 +32,7 @@ class Portal(pygame.sprite.Sprite):
 
 class Green_Portal(Portal):
     def __init__(self, x, y):
+        self.sprite = random.randint(0, 21)
         Portal.__init__(self, x, y)
 
     def load_images(self):
@@ -42,10 +43,11 @@ class Green_Portal(Portal):
 
 class Purple_Portal(Portal):
     def __init__(self, x, y):
+        self.sprite = random.randint(0, 21)
         Portal.__init__(self, x, y)
 
     def load_images(self):
         for i in range(1, 22):
             self.sprites.append(pygame.transform.scale(pygame.image.load(f"../assets/images/portals/purple/tile{i:03d}.png"), (96, 96)))
 
-        self.image = self.sprites[0]
+        self.image = self.sprites[7]
