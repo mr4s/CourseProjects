@@ -84,7 +84,7 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, tile_group, portal_group):
         self.acceleration = Vector(0, self.VER_ACC)
-        portal = self.go_through_portal(portal_group)
+        # portal = self.go_through_portal(portal_group)
 
         key = pygame.key.get_pressed()
 
@@ -106,9 +106,9 @@ class Player(pygame.sprite.Sprite):
         self.velocity += self.acceleration
         self.position += self.velocity + 0.5*self.acceleration
 
-        if self.position.x+CAR_SIZE[0]-10 < 0 and not portal:
+        if self.position.x+CAR_SIZE[0]-10 < 0 and self.position.y < 630 and self.position.y > 100:
             self.position.x = WINDOW_WIDTH
-        elif self.position.x > WINDOW_WIDTH and not portal:
+        elif self.position.x > WINDOW_WIDTH and self.position.y < 630 and self.position.y > 100:
             self.position.x = -(CAR_SIZE[0]-10)
 
         self.rect.bottomleft = self.position
@@ -157,30 +157,6 @@ class Player(pygame.sprite.Sprite):
 
             if self.health > 0:
                 self.health -= 10
-
-    def go_through_portal(self, portal_group):
-        portal = pygame.sprite.spritecollide(self, portal_group, False, pygame.sprite.collide_mask)
-
-        if portal:
-            portal = portal[0]
-            if portal == portal_group.sprites()[0]:
-                self.position = Vector(portal_group.sprites()[3].rect.left-16, portal_group.sprites()[3].rect.bottom)
-                self.rect.bottomright = self.position
-            elif portal == portal_group.sprites()[1]:
-                self.position = Vector(portal_group.sprites()[2].rect.left+48, portal_group.sprites()[2].rect.bottom)
-                self.rect.bottomleft = self.position
-            elif portal == portal_group.sprites()[2]:
-                self.position = Vector(portal_group.sprites()[1].rect.left-16, portal_group.sprites()[1].rect.bottom)
-                self.rect.bottomright = self.position
-            elif portal == portal_group.sprites()[3]:
-                self.position = Vector(portal_group.sprites()[0].rect.left+48, portal_group.sprites()[0].rect.bottom)
-                self.rect.bottomleft = self.position
-
-
-        if portal:
-            return portal
-        else:
-            return []
 
     def lose(self):
         pass

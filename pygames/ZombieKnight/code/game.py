@@ -32,7 +32,7 @@ class Game():
             for t in self.tile_group:
                 t.update()
 
-            self.portal_group.update()
+            self.portal_group.update(self.player_group, self.zombie_group)
             self.player_group.update(self.tile_group, self.portal_group, self.zombie_group, attack)
             self.zombie_group.update(self.player_group.sprites()[0].rect.center, self.portal_group, self.tile_group)
 

@@ -43,7 +43,7 @@ class Zombie(pygame.sprite.Sprite):
 
         self.move(player_location, portal_group)
         self.stay_on_platform(tile_group)
-        self.go_through_portal(portal_group)
+        # self.go_through_portal(portal_group)
 
     def move(self, player_location, portal_group):
         self.acceleration = Vector(0, self.VER_ACC)
@@ -69,9 +69,9 @@ class Zombie(pygame.sprite.Sprite):
         self.velocity += self.acceleration
         self.position += self.velocity+0.5*self.acceleration
 
-        if self.position.x+CAR_SIZE[0]-10 < 0:
+        if self.position.x+CAR_SIZE[0]-10 < 0 and self.position.y < 630 and self.position.y > 100:
             self.position.x = WINDOW_WIDTH
-        elif self.position.x > WINDOW_WIDTH:
+        elif self.position.x > WINDOW_WIDTH and self.position.y < 630 and self.position.y > 100:
             self.position.x = -(CAR_SIZE[0]-10)
 
         self.rect.bottomleft = self.position
