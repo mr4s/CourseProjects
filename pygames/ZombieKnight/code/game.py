@@ -2,6 +2,7 @@ import pygame, random
 from player import Player
 from zombies import Zombie
 from portals import Green_Portal, Purple_Portal
+from ruby import BigRuby#, Ruby
 from setup import *
 
 class Game():
@@ -21,6 +22,7 @@ class Game():
 
         self.night = 1
         self.tts = STARTING_TIME
+        self.zombie_interval = 5
 
         self.initialize()
 
@@ -32,6 +34,9 @@ class Game():
             for t in self.tile_group:
                 t.update()
 
+            self.kill_zombies()
+
+            self.center_ruby.update()
             self.portal_group.update(self.player_group, self.zombie_group)
             self.player_group.update(self.tile_group, self.portal_group, self.zombie_group, attack)
             self.zombie_group.update(self.player_group.sprites()[0].rect.center, self.portal_group, self.tile_group)
@@ -93,9 +98,21 @@ class Game():
         ]
 
         self.initialize_tiles(tile_map)
+        self.initialize_center_ruby()
         self.initialize_player(tile_map)
         self.initialize_portals(tile_map)
         self.initialize_zombies()
+        # self.initialize_rubies()
+
+    def initialize_rubies(self):
+        self.ruby_group = pygame.sprite.Group()
+
+        x = random.randint(32, WINDOW_WIDTH-32)
+        ruby = Ruby(x, 0)
+        self.ruby_group.add(ruby)
+
+    def initialize_center_ruby(self):
+        self.center_ruby = BigRuby()
 
     def initialize_portals(self, tile_map):
         self.portal_group = pygame.sprite.Group()
@@ -132,6 +149,10 @@ class Game():
     def start(self):
         self.begin = True
 
+    def kill_zombies(self):
+        if pygame.sprite.groupcollide(self.player_group.sprites()[0].slash_group, self.zombie_group, True, True):
+            self.player_group.sprites()[0].score += 10
+
 class Tiles(pygame.sprite.Sprite):
     def __init__(self, tile_type, x, y):
         super().__init__()
@@ -146,3 +167,4 @@ class Tiles(pygame.sprite.Sprite):
         
     def update(self):
         display_surface.blit(self.image, self.rect)
+

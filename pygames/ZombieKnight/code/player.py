@@ -189,3 +189,4 @@ class Slash(pygame.sprite.Sprite):
         else:
             self.image = pygame.transform.flip(self.image, True, False)
             self.direction = -1
+
