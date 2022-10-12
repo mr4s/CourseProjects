@@ -4,7 +4,7 @@ from setup import *
 Vector = pygame.math.Vector2
 
 class Zombie(pygame.sprite.Sprite):
-    def __init__(self, x, y, portal_group, gender="girl"):
+    def __init__(self, x, y, portal_group, night, gender="girl"):
         super().__init__()
 
         self.sprite = 0
@@ -17,7 +17,11 @@ class Zombie(pygame.sprite.Sprite):
 
         self.rect.bottomleft = self.position
 
-        self.HOR_ACC = 0.3
+        if night < 5:
+            self.HOR_ACC = 0.3
+        else:
+            self.HOR_ACC = 0.5
+
         self.HOR_FRICTION = 0.15
 
         self.VER_ACC = 0.5
@@ -43,7 +47,6 @@ class Zombie(pygame.sprite.Sprite):
 
         self.move(player_location, portal_group)
         self.stay_on_platform(tile_group)
-        # self.go_through_portal(portal_group)
 
     def move(self, player_location, portal_group):
         self.acceleration = Vector(0, self.VER_ACC)
@@ -93,30 +96,6 @@ class Zombie(pygame.sprite.Sprite):
         if collided_platforms and self.velocity.y > 0:
             self.position.y = collided_platforms[0].rect.top+5
             self.velocity.y = 0
-
-    def go_through_portal(self, portal_group):
-        portal = pygame.sprite.spritecollide(self, portal_group, False, pygame.sprite.collide_mask)
-
-        if portal:
-            portal = portal[0]
-            if portal == portal_group.sprites()[0]:
-                self.position = Vector(portal_group.sprites()[3].rect.left-16, portal_group.sprites()[3].rect.bottom)
-                self.rect.bottomright = self.position
-            elif portal == portal_group.sprites()[1]:
-                self.position = Vector(portal_group.sprites()[2].rect.left+54, portal_group.sprites()[2].rect.bottom)
-                self.rect.bottomleft = self.position
-            elif portal == portal_group.sprites()[2]:
-                self.position = Vector(portal_group.sprites()[1].rect.left-16, portal_group.sprites()[1].rect.bottom)
-                self.rect.bottomright = self.position
-            elif portal == portal_group.sprites()[3]:
-                self.position = Vector(portal_group.sprites()[0].rect.left+54, portal_group.sprites()[0].rect.bottom)
-                self.rect.bottomleft = self.position
-
-
-        if portal:
-            return portal
-        else:
-            return []
 
     def die(self):
         if self.velocity >= 0:

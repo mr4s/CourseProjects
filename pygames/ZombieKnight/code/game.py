@@ -17,12 +17,21 @@ class Game():
         self.begin_txt = self.poultrygeist_font.render("Press 'Enter' to Begin", True, WHITE)
         self.begin_rect = self.begin_txt.get_rect()
         self.begin_rect.center = (WINDOW_WIDTH//2, WINDOW_HEIGHT//2+30)
+        self.survived_txt = self.poultrygeist_font.render("You survived the night!", True, GREEN)
+        self.survived_rect = self.survived_txt.get_rect()
+        self.survived_rect.center = (WINDOW_WIDTH//2, WINDOW_HEIGHT//2-50)
+        self.continue_txt = self.poultrygeist_font.render("Press 'Enter' to continue...", True, WHITE)
+        self.continue_rect = self.continue_txt.get_rect()
+        self.continue_rect.center = (WINDOW_WIDTH//2, WINDOW_HEIGHT//2+30)
 
         self.begin = False
+        self.start_night = False
 
         self.night = 1
-        self.tts = STARTING_TIME
+        self.tts = 10
+        # self.tts = STARTING_TIME
         self.zombie_interval = 5
+        self.frame = 0
 
         self.initialize()
 
@@ -30,11 +39,21 @@ class Game():
         if self.begin == False:
             display_surface.blit(self.game_name_txt, self.game_name_rect)
             display_surface.blit(self.begin_txt, self.begin_rect)
-        else:
+        elif self.start_night == True:
+            if self.tts == 0:
+                self.start_night = False
+
             for t in self.tile_group:
                 t.update()
 
             self.kill_zombies()
+            if self.tts == STARTING_TIME or (self.tts%self.zombie_interval == 0 and self.frame == 0):
+                self.create_zombies()
+
+            self.frame += 1
+            if self.frame == FPS:
+                self.tts -= 1
+                self.frame = 0
 
             self.center_ruby.update()
             self.portal_group.update(self.player_group, self.zombie_group)
@@ -45,6 +64,21 @@ class Game():
             self.portal_group.draw(display_surface)
             self.player_group.draw(display_surface)
             self.zombie_group.draw(display_surface)
+        else:
+            display_surface.blit(self.survived_txt, self.survived_rect)
+            display_surface.blit(self.continue_txt, self.continue_rect)
+
+    def new_night(self, start = False):
+        self.start_night = start
+        self.tts = STARTING_TIME
+        self.night += 1
+        self.frame = 0
+
+        if self.night < 5:
+            self.zombie_interval -= 1
+
+        self.initialize_zombies()
+        self.player_group.sprites()[0].restart_position()
 
     def blit_text(self):
         score_txt = self.pixel_font.render(f"Score: {self.player_group.sprites()[0].score}", True, WHITE)
@@ -134,8 +168,9 @@ class Game():
     def initialize_zombies(self):
         self.zombie_group = pygame.sprite.Group()
 
+    def create_zombies(self):
         x = random.randint(0, WINDOW_WIDTH-32)
-        zombie = Zombie(x, 0, self.portal_group, random.choice(["boy", "girl"]))
+        zombie = Zombie(x, 0, self.portal_group, self.night, random.choice(["boy", "girl"]))
         self.zombie_group.add(zombie)
 
     def initialize_tiles(self, tile_map):
@@ -148,6 +183,7 @@ class Game():
 
     def start(self):
         self.begin = True
+        self.start_night = True
 
     def kill_zombies(self):
         if pygame.sprite.groupcollide(self.player_group.sprites()[0].slash_group, self.zombie_group, True, True):

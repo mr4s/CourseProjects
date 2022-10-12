@@ -18,6 +18,8 @@ class Player(pygame.sprite.Sprite):
         self.velocity = Vector(0, 0)
         self.acceleration = Vector(0, 0)
 
+        self.STARTING_POSITION = self.position
+
         self.HOR_ACC = 1.4
         self.HOR_FRICTION = 0.15
 
@@ -157,6 +159,10 @@ class Player(pygame.sprite.Sprite):
 
             if self.health > 0:
                 self.health -= 10
+
+    def restart_position(self):
+        self.position = self.STARTING_POSITION
+        self.rect.center = self.position
 
     def lose(self):
         pass
